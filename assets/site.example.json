@@ -1,0 +1,529 @@
+{
+  "demo": true,
+  "name": "小满",
+  "brand": "XM·STUDIO",
+  "scene": "studio",
+  "theme": {
+    "accent": "#E2434F",
+    "ink": "#1C2342",
+    "lime": "#D6F04F",
+    "sky": "#CBD7EA",
+    "paper": "#FFFDF9"
+  },
+  "hero": {
+    "hi": "hi，我是小满，欢迎来我的小房间 ↘",
+    "title": "把脑子里的点子，<mark>做成</mark>真的东西。",
+    "sub": "一个喜欢做产品、也喜欢做饭和旅行的人。点一点房间里的东西，每一件都藏着一段故事。",
+    "primary": {
+      "text": "看看我的作品 →",
+      "go": "works"
+    },
+    "secondary": {
+      "text": "先认识我",
+      "go": "about"
+    }
+  },
+  "avatar": {
+    "skin": "#F6DDD2",
+    "hair": "#2A2238",
+    "top": "#F9C6CC",
+    "bottom": "#2B3563",
+    "style": "pants",
+    "accessory": "glasses",
+    "lines": [
+      "欢迎光临～",
+      "点点桌上的东西试试！",
+      "右下角可以和我的 AI 分身聊天哦"
+    ]
+  },
+  "modules": [
+    {
+      "id": "about",
+      "type": "about",
+      "label": "关于",
+      "en": "about",
+      "style": "profile",
+      "title": "你好，我是小满",
+      "subtitle": "A curious maker.",
+      "data": {
+        "photo": "",
+        "bio": "喜欢把模糊的想法变成能用的产品。做过网站、小程序和一些小硬件，也写写东西。这里是我的线上小房间。",
+        "stickers": [
+          [
+            "PM",
+            "产品经理"
+          ],
+          [
+            "Maker",
+            "动手做东西"
+          ],
+          [
+            "12",
+            "座城市走过"
+          ],
+          [
+            "INFP",
+            "生活里的我"
+          ]
+        ],
+        "profile": [
+          [
+            "方向",
+            "AI 产品 · 从 0 到 1"
+          ],
+          [
+            "经历",
+            "某互联网公司 · 某 AI 创业公司 等"
+          ],
+          [
+            "MBTI",
+            "INFP"
+          ],
+          [
+            "在做",
+            "一个帮人记菜谱的小工具"
+          ]
+        ],
+        "badges": [
+          "产品设计",
+          "AI Builder",
+          "爱做饭",
+          "常驻某一线城市"
+        ],
+        "toolbox": [
+          "Figma",
+          "Prompt",
+          "Python",
+          "SQL",
+          "Notion",
+          "Vibe Coding"
+        ]
+      }
+    },
+    {
+      "id": "journey",
+      "type": "journey",
+      "label": "经历",
+      "en": "experience",
+      "style": "book",
+      "title": "我走过的路",
+      "subtitle": "Chapters.",
+      "lede": "每一段经历都是一章，点目录或翻页看看。",
+      "data": {
+        "items": [
+          {
+            "org": "某互联网公司",
+            "yr": "2025 – 至今",
+            "title": "AI 助手 · 体验优化",
+            "pic": "chat",
+            "pts": [
+              "负责对话体验的需求设计与跟进",
+              "搭建评测集，用评测结果驱动效果优化",
+              "和研发、算法一起推进多个专项上线"
+            ],
+            "note": "需求设计 · 评测 · 体验"
+          },
+          {
+            "org": "某 AI\n创业公司",
+            "yr": "2024",
+            "title": "AI 生成网站 · 0-1",
+            "pic": "web",
+            "pts": [
+              "从用户访谈开始梳理需求",
+              "画原型、写需求文档，推动第一版上线"
+            ],
+            "note": "用户访谈 · 原型 · 上线"
+          },
+          {
+            "org": "某高校",
+            "yr": "2020 – 2024",
+            "title": "本科 · 计算机相关专业",
+            "pic": "school",
+            "pts": [
+              "做过几个课程项目和比赛作品",
+              "在社团里负责活动策划"
+            ],
+            "note": "学习 · 社团"
+          }
+        ],
+        "cases": [
+          {
+            "t": "一个 AI 助手的体验复盘",
+            "org": "某互联网公司",
+            "tags": [
+              "评测",
+              "体验"
+            ],
+            "bg": "#AFC3E6",
+            "pic": "chat",
+            "article": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "works",
+      "type": "works",
+      "label": "作品",
+      "en": "works",
+      "style": "bento",
+      "title": "我做过的东西",
+      "subtitle": "Selected works.",
+      "lede": "自己动手做的小作品。有视频的点开就能播。",
+      "data": {
+        "items": [
+          {
+            "kind": "video",
+            "shape": "feature",
+            "src": "",
+            "poster": "",
+            "dur": "0:30",
+            "type": "硬件 · AI",
+            "bg": "#E9DDF5",
+            "t": "会说话的小桌面屏",
+            "d": "把一个语音助手装进一块小屏幕：对它说话，它会聆听、思考、回答。",
+            "tags": [
+              "硬件原型",
+              "语音交互"
+            ],
+            "note": "↗ 把视频放进 media/ 文件夹再填 src"
+          },
+          {
+            "kind": "image",
+            "src": "",
+            "type": "小程序",
+            "bg": "#FFE3CF",
+            "t": "菜谱记录小程序",
+            "d": "拍一张照片，自动整理成步骤清楚的菜谱。",
+            "tags": [
+              "小程序",
+              "AI 识图"
+            ]
+          },
+          {
+            "kind": "image",
+            "src": "",
+            "type": "AIGC · 视频",
+            "bg": "#1C2342",
+            "dark": true,
+            "t": "AI 生成的旅行短片",
+            "d": "用 AI 把旅行照片串成一支 30 秒的小短片。",
+            "tags": [
+              "AIGC",
+              "视频"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "products",
+      "type": "products",
+      "label": "产品",
+      "en": "projects",
+      "style": "carousel",
+      "title": "我在做的产品",
+      "subtitle": "Things I build.",
+      "data": {
+        "items": [
+          {
+            "t": "菜谱小管家",
+            "type": "效率工具",
+            "desc": "随手记下家里人爱吃的菜，自动生成采购清单。",
+            "url": "https://example.com",
+            "bg": "#E2434F",
+            "fg": "#FFFDF9",
+            "ic": "cup"
+          },
+          {
+            "t": "旅行地图",
+            "type": "生活记录",
+            "desc": "把去过的城市点亮在地图上，配一句话和一张照片。",
+            "url": "",
+            "bg": "#D6F04F",
+            "fg": "#1C2342",
+            "ic": "plane"
+          },
+          {
+            "t": "AI 灵感卡",
+            "type": "创作工具",
+            "desc": "每天抽一张创作灵感卡，帮你开始画第一笔。",
+            "url": "",
+            "bg": "#1C2342",
+            "fg": "#F9C6CC",
+            "ic": "spark"
+          }
+        ]
+      }
+    },
+    {
+      "id": "articles",
+      "type": "articles",
+      "label": "文章",
+      "en": "writing",
+      "style": "list",
+      "title": "写下来的东西",
+      "subtitle": "Notes & essays.",
+      "data": {
+        "items": [
+          {
+            "title": "做 AI 产品，先想清楚用户要的是什么",
+            "summary": "从一次用户访谈说起：用户要的往往不是一键完美，而是一个能改的好初稿。",
+            "date": "2025-10",
+            "readTime": "5 分钟",
+            "tags": [
+              "产品",
+              "AI"
+            ],
+            "content": [
+              "这是一篇示例文章。正文每一项是一段，支持 **加粗**、`## 小标题`、`1.` 和 `-` 列表。",
+              "## 一、从访谈开始",
+              "访谈时我发现，用户真正在意的是能不能快速改。",
+              "## 二、做减法",
+              "- 先保证核心流程稳定\n- 再慢慢打磨细节"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "hobbies",
+      "type": "hobbies",
+      "label": "爱好",
+      "en": "hobbies",
+      "style": "bento",
+      "title": "下班以后",
+      "subtitle": "Off the clock.",
+      "lede": "工作之外，我喜欢弹琴、做饭、旅行和到处探索。每张卡片都能玩一下 ↓",
+      "data": {
+        "items": [
+          {
+            "t": "钢琴",
+            "en": "piano",
+            "d": "累了就弹两段。点琴键，或者用电脑键盘 A–K 弹。",
+            "c": "#1C2342",
+            "dark": true,
+            "wide": true,
+            "i": "music",
+            "widget": "piano"
+          },
+          {
+            "t": "AI 创作",
+            "en": "make with AI",
+            "d": "抽一张创作灵感，画一张小画。",
+            "c": "#EEF8C9",
+            "i": "wand",
+            "widget": "gacha"
+          },
+          {
+            "t": "徒步",
+            "en": "hiking",
+            "d": "喜欢往山里走，一步一步把风景走出来。",
+            "c": "#DDEFE4",
+            "i": "mountain",
+            "widget": "hike"
+          },
+          {
+            "t": "旅行",
+            "en": "travel",
+            "d": "去过的城市，都盖了一个章。",
+            "c": "#E2E9F6",
+            "i": "pin",
+            "widget": "stamps",
+            "go": "travel"
+          },
+          {
+            "t": "写作",
+            "en": "writing",
+            "d": "把想法写下来。",
+            "c": "#F4EEE6",
+            "i": "pen",
+            "widget": "typewriter",
+            "go": "articles"
+          },
+          {
+            "t": "探索新鲜事儿",
+            "en": "curious",
+            "d": "新产品、新地方、新玩法，都想试试。",
+            "c": "#E9DDF5",
+            "i": "spark",
+            "wide": true,
+            "widget": "radar",
+            "points": [
+              [
+                "新产品",
+                "每周至少试用一个新的 AI 产品"
+              ],
+              [
+                "新地方",
+                "周末喜欢去没去过的小馆子"
+              ],
+              [
+                "新玩法",
+                "最近在学做手冲咖啡"
+              ],
+              [
+                "新工具",
+                "能自动化的事情就写个小脚本"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "travel",
+      "type": "travel",
+      "label": "足迹",
+      "en": "travels",
+      "style": "map",
+      "title": "走过的地方",
+      "subtitle": "Places I've been.",
+      "data": {
+        "home": "北京",
+        "cities": [
+          {
+            "name": "北京",
+            "lat": 39.9,
+            "lng": 116.4,
+            "note": "大本营。"
+          },
+          {
+            "name": "上海",
+            "lat": 31.23,
+            "lng": 121.47
+          },
+          {
+            "name": "成都",
+            "lat": 30.57,
+            "lng": 104.07,
+            "note": "吃得最开心的一次旅行。"
+          },
+          {
+            "name": "大理",
+            "lat": 25.59,
+            "lng": 100.23,
+            "note": "风很大，云很低。"
+          },
+          {
+            "name": "厦门",
+            "lat": 24.48,
+            "lng": 118.09,
+            "memory": {
+              "title": "海边的早餐",
+              "date": "某年 · 夏",
+              "story": "这是一段示例回忆：写一件在这座城市发生的小事，一两句就好。"
+            }
+          },
+          {
+            "name": "西安",
+            "lat": 34.34,
+            "lng": 108.94
+          },
+          {
+            "name": "杭州",
+            "lat": 30.27,
+            "lng": 120.16
+          },
+          {
+            "name": "青岛",
+            "lat": 36.07,
+            "lng": 120.38
+          }
+        ]
+      }
+    },
+    {
+      "id": "contact",
+      "type": "contact",
+      "label": "联系",
+      "en": "say hi",
+      "style": "letter",
+      "title": "写封信给我",
+      "subtitle": "Say hi.",
+      "data": {
+        "greeting": "你好！\n无论是聊产品、谈合作，\n还是只想打个招呼，都欢迎写信给我。",
+        "email": "hello@example.com",
+        "social": [
+          {
+            "t": "GitHub",
+            "h": "@your-id",
+            "d": "小项目和代码",
+            "u": "https://github.com/",
+            "bg": "#2B3563",
+            "fg": "#fff",
+            "icon": "GH"
+          },
+          {
+            "t": "小红书",
+            "h": "@你的昵称",
+            "d": "做产品的日常",
+            "u": "",
+            "bg": "#FF2442",
+            "fg": "#fff",
+            "icon": "小红书"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chat",
+      "type": "chat",
+      "label": "和我聊聊",
+      "en": "chat",
+      "nav": false,
+      "object": false,
+      "title": "小满的 AI 分身",
+      "subtitle": "Ask me anything.",
+      "data": {
+        "endpoint": "",
+        "hello": "嗨！我是小满的 AI 分身，可以问我做过什么、喜欢什么，或者怎么联系我～",
+        "suggestions": [
+          "你是谁？",
+          "你做过什么产品？",
+          "你有什么爱好？",
+          "怎么联系你？"
+        ],
+        "qa": [
+          {
+            "k": [
+              "你是谁",
+              "介绍",
+              "自己"
+            ],
+            "a": "我是小满，喜欢做产品、做饭和旅行。房间里每样东西都对应我的一部分～"
+          },
+          {
+            "k": [
+              "产品",
+              "作品",
+              "做过"
+            ],
+            "a": "我做过一个会说话的小桌面屏、一个菜谱小程序，还有一支 AI 旅行短片。",
+            "go": "works"
+          },
+          {
+            "k": [
+              "爱好",
+              "喜欢",
+              "平时"
+            ],
+            "a": "弹琴、做饭、徒步、旅行，还有试各种新鲜玩意儿。",
+            "go": "hobbies"
+          },
+          {
+            "k": [
+              "联系",
+              "邮箱",
+              "合作",
+              "微信"
+            ],
+            "a": "最好的方式是发邮件给我，联系页里有邮箱。",
+            "go": "contact"
+          }
+        ],
+        "fallback": "这个问题网站上还没写哦，欢迎发邮件直接问我本人～"
+      }
+    }
+  ]
+}
