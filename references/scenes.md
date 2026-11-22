@@ -91,41 +91,120 @@
 | `window` | 窗边座位 + 明信片 | travel | 窗外的远方 |
 | `postbox` | 红色邮筒 | contact / chat | 给我写信 |
 
-## 用户想要的场景不在列表里？（画室、录音棚、图书馆、宿舍、车库……）
+## 根据描述搭房间（推荐，所有 AI 都能做）
 
-**推荐做法：只写 JSON，不改代码**（所有 AI 都能做，包括只能聊天的）。设 `"scene": "custom"`，再写一个 `room` 对象：
+用户用自己的话描述一个地方（“深夜的拉面小店”“海边冲浪小屋”“露营地”“堆满植物的卧室”……），你按下面 4 步把它变成 `"scene": "custom"` + `room`，**只写 JSON，不改代码**：
 
+1. **定大框架**（`room.colors`）
+   - 室内还是户外：室内两面墙（默认）；半开放（海边小屋、门店）只留后墙 `"walls": "back"`；户外（露营、花园、天台）不要墙 `"walls": false`。
+   - 地面：木地板（默认）、格子砖 `"floorStyle": "tiles"`、纯色 `"floorStyle": "plain"`（草地、沙滩、水泥地都用它，配合 `floor` `floor2` 颜色）。
+   - 白天 / 夜晚：有灯、霓虹、篝火、“深夜”等字眼就 `"night": true`；夜晚可以加串灯 `"lights": true`。
+   - 窗户：左墙默认有一扇，不要就 `"window": false`；`windowZ` 可以挪位置。地毯：`rug` `rug2` 改颜色，不要地毯就 `"rug": false`。
+   - 底座：能推断就直接定（海边 → `water`，户外草地 → `grass`，梦幻 / 卧室 → `cloud`，店铺 / 展示 → `pedestal`，科技 / 游戏 → `rock`），写在顶层 `base`。
+2. **挑 6–9 件“能点”的东西**，每件对应一个板块，挑最能代表这个地方、又和板块有好懂关系的：招牌 / 门口小黑板 → 关于我；菜单 / 书架 / 速写本 → 经历；吧台上的锅、画架、冲浪板、电脑 → 作品；冰箱、礼物盒、货架 → 产品；书、桌上的本子 → 文章；唱片机、钢琴、篝火、调料架 → 爱好；地球仪、旅行海报、窗外 → 去过的地方；电话、邮筒、信封、长椅 → 联系。
+3. **再加 3–6 件装饰**（没有 `key`）：凳子、植物、吊灯、地毯、树……让场景“像那个地方”。
+4. **摆位置**：可点的东西分散在三块区域——后墙（`wall: "back"` 的挂件，或贴后墙放的家具 z≈-4.6 到 -5.3）、左墙（`wall: "left"`）、地面（x、z 在 -5 到 5）。小人站在 (1.8, 0, 1.3)，周围 1.5 内别放东西；可点的东西之间隔开 1.5 以上，气泡才不会挤。没有墙时，挂件（画框、黑板、霓虹字）会自动变成立在地上的立牌。
+
+物件库里没有的东西，用最像的代替并在方案里说一声（招财猫 → 金色的小礼物盒；书法挂轴 → `frame` 的 `text`；吧台 → `counter`）。
+
+### 四个例子（都实际搭过）
+
+**深夜拉面店**（`"base": "pedestal"`）：
 ```json
-"scene": "custom",
-"room": {
-  "name": "画室", "loading": "正在挤颜料、支画架…",
-  "colors": { "floor":"#EADFCF","floor2":"#DDD0BC","wall":"#F6F3EE","wall2":"#DCE6F5","rug":"#3D6FE0","rug2":"#FFFDF9","windowZ":-2.2 },
+{ "name": "深夜拉面店", "colors": {"wall": "#4A2F2A", "wall2": "#7A3B2E", "trim": "#C9A06A", "floor": "#3A3330", "floor2": "#2E2826", "floorStyle": "tiles", "rug": "#E2434F", "rug2": "#3A3330", "window": false, "lights": true, "night": true},
   "props": [
-    { "key":"portrait","kind":"frame","for":["about"],"wall":"back","x":-2.6,"y":5.4,"w":2.2,"h":2.7,"art":"portrait" },
-    { "key":"easel","kind":"easel","for":["works"],"x":-2.0,"z":-2.2,"rot":0.55 },
-    { "key":"sketchbooks","kind":"desk","for":["journey"],"x":2.6,"z":-4.95,"w":4.4,"items":["sketchbooks","jar"] },
-    { "key":"bookshelf","kind":"bookshelf","for":["custom"],"wall":"left","z":2.6 },
-    { "key":"paints","kind":"cart","for":["hobbies"],"x":4.6,"z":-2.0 },
-    { "key":"letters","kind":"table","for":["contact"],"x":-2.4,"z":2.6,"w":1.4,"items":["letter","mug"] },
-    { "kind":"chair","x":-3.6,"z":2.6,"rot":1.57,"color":"#FFD84D" },
-    { "kind":"plant","x":5.2,"z":1.6 }
-  ]
-}
+    {"key": "sign", "kind": "neon", "for": ["about"], "wall": "back", "x": 2.6, "y": 6.0, "text": "拉面", "color": "#FF5FA2", "w": 2.6, "h": 1.1},
+    {"key": "menu", "kind": "board", "for": ["journey"], "wall": "left", "z": -2.5, "y": 4.8, "w": 2.2, "h": 2.6, "style": "chalk", "text": "MENU"},
+    {"key": "counter", "kind": "counter", "for": ["works"], "x": -1.4, "z": -4.6, "w": 6.0, "color": "#8C5A3C", "color2": "#E9D9B8", "items": ["pot", "mug", "mug"]},
+    {"kind": "stool", "x": -3.4, "z": -2.9, "color": "#E2434F"},
+    {"kind": "stool", "x": -1.4, "z": -2.9, "color": "#E2434F"},
+    {"kind": "stool", "x": 0.6, "z": -2.9, "color": "#E2434F"},
+    {"key": "jars", "kind": "wallshelf", "for": ["hobbies"], "wall": "back", "x": -1.6, "y": 4.4, "w": 3.6, "items": ["jar", "plant", "jar", "books"]},
+    {"key": "fridge", "kind": "fridge", "for": ["products"], "x": 4.6, "z": -4.8},
+    {"kind": "pendant", "x": -2.6, "z": -4.4},
+    {"kind": "pendant", "x": 0.0, "z": -4.4},
+    {"key": "table", "kind": "table", "for": ["articles"], "x": -3.0, "z": 2.2, "items": ["mug", "letter"]},
+    {"key": "poster", "kind": "frame", "for": ["travel"], "wall": "left", "z": 2.4, "y": 4.6, "art": "landscape", "w": 1.8, "h": 2.2},
+    {"key": "phone", "kind": "wallphone", "for": ["contact"], "wall": "left", "z": -5.0, "y": 3.4},
+    {"kind": "plant", "x": 5.2, "z": 0.6}
+  ] }
 ```
-- **有 `key` 的物件可以点**，模块用 `"object": "key"` 指定挂在它上面（或者按 `for` 自动匹配）；没有 `key` 的只是装饰。
-- `room.base` 也可以写底座（和顶层 `base` 一样）。`colors` 可用：`floor` `floor2` `wall` `wall2`（墙裙）`trim` `rug` `rug2` `floorTiles`（true = 格子地砖）`window`（false = 不要窗）`windowZ` `windowY` `lights`（串灯）`night`（默认夜晚）。
-- 也可以在内置场景上加减：`"scene": "kitchen"` + `room.hide: ["spices"]`（按槽位 key 去掉物件）+ `room.props: [...]`（加新物件，比如给新增的“书单”模块加一个书架）。
 
-**物件种类 `kind`**（括号里是常用参数）：
+**海边冲浪小屋**（`"base": "water"`，只留后墙）：
+```json
+{ "name": "海边冲浪小屋", "colors": {"walls": "back", "wall": "#E8F4F8", "wall2": "#7EC8E3", "floor": "#F1E1C2", "floor2": "#E6D2AE", "floorStyle": "plain", "rug": "#F5A623", "rug2": "#FFFDF9", "lights": true},
+  "props": [
+    {"key": "board1", "kind": "surfboard", "for": ["works"], "x": -3.6, "z": -5.2, "color": "#E2434F"},
+    {"kind": "surfboard", "x": -2.6, "z": -5.3, "color": "#7EC8E3"},
+    {"key": "window", "kind": "window", "for": ["about"], "wall": "back", "x": 1.4, "y": 4.8, "w": 3.0, "h": 2.2},
+    {"key": "shelf", "kind": "wallshelf", "for": ["hobbies"], "wall": "back", "x": -2.8, "y": 5.6, "w": 3.0, "items": ["plant", "camera", "jar"]},
+    {"key": "umbrella", "kind": "umbrella", "for": ["travel"], "x": -3.4, "z": 2.2, "color": "#F5A623"},
+    {"key": "bench", "kind": "bench", "for": ["contact"], "x": 4.2, "z": -4.6, "color": "#7EC8E3"},
+    {"key": "board", "kind": "board", "for": ["journey"], "wall": "back", "x": 4.6, "y": 5.2, "w": 1.8, "h": 1.6, "style": "cork", "text": "LOG"},
+    {"key": "crate", "kind": "crate", "for": ["products"], "x": 0.4, "z": -4.6, "items": ["fruit"]},
+    {"key": "table", "kind": "table", "for": ["articles"], "x": 4.4, "z": 2.0, "items": ["candle", "books"]},
+    {"kind": "plant", "x": 5.3, "z": -1.6, "size": 1.6}
+  ] }
+```
 
-| 贴墙的（用 `wall`:"back"/"left" + `x` 或 `z` + `y` 高度） | 放地上的（用 `x` `z` `rot`；写 `wall` 会自动靠墙） |
+**露营地**（`"base": "grass"`，没有墙，夜晚有篝火）：
+```json
+{ "name": "露营地", "colors": {"walls": false, "floor": "#A9D18E", "floor2": "#97C276", "floorStyle": "plain", "rug": "#F5A623", "rug2": "#FFFDF9", "night": true},
+  "props": [
+    {"key": "tent", "kind": "tent", "for": ["about"], "x": -2.6, "z": -3.6, "color": "#F5A623"},
+    {"key": "fire", "kind": "campfire", "for": ["hobbies"], "x": 0.2, "z": -0.6},
+    {"key": "tree1", "kind": "tree", "for": ["journey"], "x": 3.8, "z": -4.4, "size": 1.1},
+    {"kind": "tree", "x": -5, "z": 0.8},
+    {"kind": "tree", "x": 5.0, "z": 3.6, "size": 0.8},
+    {"key": "bench", "kind": "bench", "for": ["contact"], "x": -2.4, "z": 1.6, "rot": 0.6},
+    {"key": "sign", "kind": "board", "for": ["works"], "wall": "back", "x": 0.8, "y": 3.4, "w": 2.4, "h": 1.6, "style": "paper", "text": "WORKS"},
+    {"key": "flowers", "kind": "flowerbed", "for": ["travel"], "x": 4.4, "z": 0.0, "rot": -1.57},
+    {"key": "crate", "kind": "crate", "for": ["products"], "x": -4.6, "z": -1.6, "items": ["camera"]},
+    {"key": "lamp", "kind": "lamp", "for": ["articles"], "x": -4.8, "z": -4.8}
+  ] }
+```
+
+**卧室**（`"base": "cloud"`）：
+```json
+{ "name": "卧室", "colors": {"wall": "#F7EEF2", "wall2": "#E9D6E4", "floor": "#E8D6BF", "floor2": "#DCC6AA", "rug": "#AFC3E6", "rug2": "#FFFDF9", "windowZ": 2.6},
+  "props": [
+    {"key": "bed", "kind": "bed", "for": ["about"], "x": -3.6, "z": -3.6, "color": "#F9C6CC"},
+    {"key": "desk", "kind": "desk", "for": ["works"], "wall": "back", "x": 2.6, "w": 3.6, "items": ["laptop", "mug"]},
+    {"kind": "chair", "x": 2.6, "z": -3.4, "rot": 3.14},
+    {"key": "shelf", "kind": "bookshelf", "for": ["journey"], "wall": "left", "z": 0.4, "w": 2.4, "h": 3.6},
+    {"key": "frame", "kind": "frame", "for": ["travel"], "wall": "back", "x": -0.4, "y": 5.2, "art": "landscape", "w": 2.0, "h": 1.5},
+    {"key": "tv", "kind": "tv", "for": ["hobbies"], "x": 4.6, "z": -0.6, "rot": -1.57},
+    {"key": "aquarium", "kind": "aquarium", "for": ["products"], "x": 4.4, "z": 3.6, "rot": -1.57},
+    {"key": "clock", "kind": "clock", "for": ["contact"], "wall": "back", "x": 5.0, "y": 5.6},
+    {"key": "lamp", "kind": "lamp", "for": ["articles"], "x": -5.3, "z": -1.6},
+    {"kind": "plant", "x": 0.2, "z": -5.3}
+  ] }
+```
+板块要挂在指定的东西上，在板块里写 `"object": "这个key"`（例如 `{"id":"about", …, "object":"tent"}`）；不写的话按 `for` 自动匹配。
+
+### 在现成房间上加减
+
+描述和现成房间很接近时（“有钢琴的书房”“带吧台的咖啡馆”），保留 `"scene": "studio"` 等，用 `room.hide` 去掉不要的东西（按 key，见上面各房间的表），用 `room.props` 加新的，用 `room.colors` 改颜色。
+
+### 物件种类 `kind`
+
+| 贴墙的（`wall`: "back" + `x`，或 `wall`: "left" + `z`；`y` 是高度 2–7） | 说明 |
 |---|---|
-| `frame` 画框（`w` `h` `art`: portrait 自画像 / landscape 风景 / abstract 抽象 / text 文字，`text`） | `easel` 画架 · `desk` 长桌（`w` `items`）· `table` 小圆桌（`w` `items`）· `counter` 柜台（`w` `items`） |
-| `board` 板子（`style`: chalk 黑板 / cork 软木 / paper 白板，`text` 标题） | `bookshelf` 书架（`w` `h`）· `crate` 木箱（`items`）· `cart` 颜料推车 · `record` 唱片机柜 |
-| `neon` 霓虹字（`text`，默认品牌名）· `wallshelf` 墙上搁板（`items`） | `piano` 钢琴 · `guitar` 吉他 · `speaker` 音箱 · `mic` 麦克风 · `globe` 地球仪 · `camera` 相机 · `gift` 礼物盒 |
-| `wallphone` 墙上电话 · `clock` 挂钟 | `sofa` 单人沙发 · `chair` 椅子 · `stool` 高脚凳 · `postbox` 邮筒 · `plant` 盆栽 · `lamp` 落地灯（夜晚会亮）· `stack` 一摞本子 |
+| `frame` 画框 | `w` `h`；`art`: portrait 自画像 / landscape 风景 / abstract 抽象 / text 文字（配 `text`） |
+| `board` 板子 | `style`: chalk 黑板 / cork 软木板 / paper 白板；`text` 标题 |
+| `neon` 霓虹字 | `text`（默认网站名）、`color` |
+| `window` 窗户 | `w` `h`；`color` `color2` 是天空颜色 |
+| `wallshelf` 墙上搁板 | `w`、`items` |
+| `wallphone` 墙上电话 · `clock` 挂钟 | |
 
-桌面 / 搁板上的小东西 `items`：`mug` `laptop` `books` `sketchbooks` `jar`（笔筒）`plant` `letter` `candle` `fruit` `pot`（锅）`cake` `camera` `globe` `record`。
+| 放地上的（`x` `z` `rot`；写 `wall` 会自动靠墙） | |
+|---|---|
+| 家具 | `desk` 长桌（`w` `items`）· `table` 小圆桌（`items`）· `counter` 柜台 / 吧台（`w` `items`）· `bookshelf` 书架（`w` `h`）· `bed` 床 · `sofa` 单人沙发 · `chair` 椅子 · `stool` 高脚凳 · `bench` 长椅 · `crate` 木箱（`items`）· `rug` 地毯（`w`） |
+| 电器 / 娱乐 | `tv` 电视柜 · `fridge` 冰箱 · `stove` 灶台 · `fireplace` 壁炉（会亮）· `arcade` 街机 · `aquarium` 鱼缸 · `record` 唱片机 · `piano` 钢琴 · `guitar` 吉他 · `speaker` 音箱 · `mic` 麦克风 |
+| 小物 | `easel` 画架 · `cart` 颜料推车 · `globe` 地球仪 · `camera` 相机 · `gift` 礼物盒 · `stack` 一摞本子 · `postbox` 邮筒 · `plant` 盆栽（`size`）· `lamp` 落地灯 · `pendant` 吊灯（从天花板垂下） |
+| 户外 | `tree` 树（`size`）· `tent` 帐篷 · `campfire` 篝火（会亮）· `umbrella` 遮阳伞（带躺椅）· `surfboard` 冲浪板 · `flowerbed` 花坛（`w`） |
+
+桌面 / 搁板上的小东西 `items`：`mug` 杯子 · `laptop` 电脑 · `books` 书 · `sketchbooks` 速写本 · `jar` 笔筒 · `plant` 小盆栽 · `letter` 信 · `candle` 蜡烛 · `fruit` 水果 · `pot` 锅 · `cake` 蛋糕 · `camera` 相机 · `globe` 地球仪 · `record` 唱片机。
 所有物件都可以加 `color` `color2`（主色 / 副色）和 `size`（整体缩放）。
 
 **进阶（能改代码时）**：想要列表里没有的物件，可以在模板的 `SCENES` 对象里复制一个场景，改名（如 `atelier`），只改两处：

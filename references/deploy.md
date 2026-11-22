@@ -5,14 +5,28 @@
 my-site/
 ├── index.html          ← 成品（内容已经写在里面）
 ├── vendor/three.min.js ← 3D 引擎（离线也能用；删掉会自动从国内/国外 CDN 下载）
-├── media/              ← 你的照片、视频（JSON 里写 media/文件名）
+├── media/              ← 你的照片、视频（build_site.py 会自动放好并改名）
 ├── api/chat.js         ← 可选：AI 分身的后端（Vercel 函数）
 ├── knowledge/*.md      ← 可选：AI 分身的知识库
 └── vercel.json         ← 可选：配合 api/chat.js
 ```
 双击 `index.html` 就能在本机打开预览（AI 分身是演示模式）。
 
-## 上线方式（任选一个，都免费起步）
+## AI 替用户上线（能运行命令时优先用这个，话术见 guided-setup.md 第 4–6 步）
+
+| 目的 | 命令 | 用户要做的 |
+|---|---|---|
+| 临时网址（1 小时内有效，不用账号） | `npx -y netlify-cli deploy --dir=my-site --no-build --allow-anonymous --json` | 什么都不用做；想保留就按输出里的认领说明登录认领 |
+| 长期网址 | `npx -y netlify-cli login`，再 `npx -y netlify-cli deploy --dir=my-site --no-build --prod --site-name <英文名-数字> --json` | 在弹出的 Netlify 页面注册 / 登录，点 **Authorize** |
+| 以后更新同一个网址 | `npx -y netlify-cli deploy --dir=my-site --no-build --prod --site <网站ID> --json` | 不用做 |
+| 真 AI 分身（Vercel） | `npx -y vercel login` → 在 my-site 里 `npx -y vercel --prod --yes` → 用户在 Vercel 的 Environment Variables 页面填好 `LLM_API_KEY` → 再 `npx -y vercel --prod --yes` | 浏览器里点一次授权；自己把大模型密钥粘贴到 Vercel 设置页（不要发到聊天里） |
+
+- 需要 Node.js（`node -v`）。从输出的 JSON 里取网址：生产部署看 `url`，否则看 `deploy_url`。
+- 有多个团队时 `--site-name` 需要配 `--team <slug>`（`npx -y netlify-cli teams:list --json` 查）。
+- 云端环境不能联网时：把 my-site 打成 zip 给用户，让用户拖进 app.netlify.com/drop。
+- 大模型密钥只写进 Vercel 的环境变量，**不要**写进网页文件、site.json 或知识库。
+
+## 用户自己上线（任选一个，都免费起步）
 
 | 方式 | 适合 | 步骤 |
 |---|---|---|

@@ -411,7 +411,7 @@ body.flat #gl,body.flat #labels{display:none}
 #editor textarea{width:100%;height:46vh;border-radius:14px;border:1.5px solid var(--line);padding:14px;font:12.5px/1.6 Menlo,Consolas,monospace;resize:vertical}
 #editor .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
 #editor .row button{border:0;border-radius:999px;padding:10px 16px;font-weight:700;background:var(--ink);color:#fff}
-#editor .row #edpreview{background:var(--accent)}
+#editor .row #edpaste{background:var(--accent)}
 #editor .row button.alt{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
 #editor .err{color:var(--accent);font-weight:700;font-size:13px}
 
@@ -500,10 +500,11 @@ body.flat #gl,body.flat #labels{display:none}
 <div id="editor">
   <div class="box">
     <h3>导入你的网站内容</h3>
-    <p>① 把 AI 给你的「网站内容代码」整段粘贴到下面（以 <code>{</code> 开头、<code>}</code> 结尾），点「预览」。② 点开各个板块，看到「📷 点这里放照片」的格子就点一下，选电脑里的照片。③ 满意后再打开这个框，点「下载成品网页」，得到你自己的 index.html。</p>
+    <p>① 先在 AI 那里点代码框的「复制」，再点下面红色的「📋 一键粘贴并预览」（不行的话就手动粘贴到框里，点「预览」）。② 点开各个板块，看到「📷 点这里放照片」的格子就点一下，选电脑里的照片。③ 满意后再打开这个框，点「下载成品网页」，得到你自己的 index.html。</p>
     <textarea id="edtxt" spellcheck="false"></textarea>
     <div class="row">
-      <button type="button" id="edpreview">预览</button>
+      <button type="button" id="edpaste">📋 一键粘贴并预览</button>
+      <button type="button" class="alt" id="edpreview">预览</button>
       <button type="button" id="eddownload">下载成品网页</button>
       <button type="button" class="alt" id="edcurrent">载入当前内容</button>
       <button type="button" class="alt" id="edreset">恢复示例</button>
@@ -1037,11 +1038,14 @@ addEventListener("keydown", e => { if (e.key === "Escape") { if ($("#lightbox").
 (() => {
   const ed = $("#editor"), ta = $("#edtxt"), err = $("#ederr");
   let hasDraft = false; try { hasDraft = !!localStorage.getItem(DRAFT_KEY); } catch (e) {}
-  if (EDIT_MODE) { const f = $("#editfab"); f.hidden = false; f.textContent = hasDraft || !(window.SITE && window.SITE.demo === true) ? "✎ 编辑中 · 下载成品网页 / 继续修改" : "✎ 这是示例内容 · 导入我的内容"; f.onclick = () => { ta.value = JSON.stringify(SITE, null, 2); ed.classList.add("on"); }; }
+  if (EDIT_MODE) { const f = $("#editfab"); f.hidden = false; f.textContent = hasDraft || !(window.SITE && window.SITE.demo === true) ? "✎ 编辑中 · 下载成品网页 / 继续修改" : "✎ 这是示例内容 · 导入我的内容"; f.onclick = () => { ta.value = JSON.stringify(SITE, null, 2); ed.classList.add("on"); if (SITE.demo === true) { ta.focus(); ta.select(); } }; }
   const parse = () => { err.textContent = ""; let s = ta.value.trim().replace(/^```(json|js)?/i, "").replace(/```$/, "").trim().replace(/^window\.SITE\s*=\s*/, "").replace(/;\s*$/, "");
     s = s.replace(/\/\/[^\n"]*$/gm, "").replace(/,\s*([}\]])/g, "$1");
     try { const o = JSON.parse(s); if (!o || !Array.isArray(o.modules)) throw new Error("缺少 modules 数组"); return o; } catch (e) { err.textContent = "格式不对：" + e.message.slice(0, 80); return null; } };
   $("#edpreview").onclick = () => { const o = parse(); if (!o) return; o.demo = "preview"; try { localStorage.setItem(DRAFT_KEY, JSON.stringify(o)); location.reload(); } catch (e) { err.textContent = "浏览器不允许本地保存，请直接下载成品"; } };
+  $("#edpaste").onclick = async () => { err.textContent = "";
+    try { const t = await navigator.clipboard.readText(); if (!t || !t.includes("{")) throw new Error("剪贴板里没有内容"); ta.value = t; $("#edpreview").click(); }
+    catch (e) { ta.value = ""; ta.focus(); err.textContent = "浏览器不让直接读剪贴板：请在框里按 Ctrl+V（Mac 按 ⌘V）粘贴，再点「预览」"; } };
   $("#eddownload").onclick = () => { const o = parse(); if (!o) return; delete o.demo;
     const json = JSON.stringify(o, null, 2).replace(/</g, "\\u003c");
     let html = PRISTINE.replace(/(<script id="site-content">)[\s\S]*?(<\/script>)/, () => `<script id="site-content">\nwindow.SITE = ${json};\n<\/script>`);
@@ -1117,6 +1121,31 @@ const PROP_KINDS = {
   speaker: { b(K, p) { const c = p.color || "#2B2B33"; return K.grp(K.at(K.rbox(1.1, 2.4, 1.0, c, .06), 0, 1.2, 0), K.rot(K.at(K.cyl(.36, .36, .06, "#55596B", 24), 0, .8, .5), Math.PI / 2, 0, 0), K.rot(K.at(K.cyl(.2, .2, .06, "#55596B", 20), 0, 1.75, .5), Math.PI / 2, 0, 0)); } },
   guitar: { b(K, p, C) { const c = p.color || "#E2434F"; const body = K.sph(.55, c, 20); body.scale.set(1, 1.25, .35); const lo = K.sph(.42, c, 18); lo.scale.set(1, 1, .35); return K.grp(K.at(body, 0, .95, 0), K.at(lo, 0, 1.65, 0), K.at(K.box(.14, 1.6, .08, "#5A3A2E"), 0, 2.6, 0), K.at(K.box(.22, .35, .1, "#1C1828"), 0, 3.5, 0), K.rot(K.at(K.cyl(.03, .03, 1.2, "#2B2B33", 6), 0, .5, -.4), .3, 0, 0)); } },
   mic: { b(K, p) { return K.grp(K.at(K.cyl(.4, .45, .06, "#2B2B33", 20), 0, .03, 0), K.at(K.cyl(.03, .03, 3, "#2B2B33", 8), 0, 1.5, 0), K.at(K.sph(.2, p.color || "#C8CCD8", 14), 0, 3.1, .05)); } },
+  // —— 更多物件：家、户外、店铺、娱乐 ——
+  window: { flat: true, b(K, p) { const w = p.w || 2.6, h = p.h || 2.2, sky = K.tex(256, 220, (x, W, H) => { const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, p.color || "#8EC5FF"); g.addColorStop(1, p.color2 || "#E8F4FF"); x.fillStyle = g; x.fillRect(0, 0, W, H); x.fillStyle = "#fff"; [[60, 60], [170, 45]].forEach(([a, b]) => { for (let i = 0; i < 4; i++) { x.beginPath(); x.arc(a + i * 15 - 22, b + (i % 2) * 6, 18, 0, 7); x.fill(); } }); });
+    const fr = "#FFFDF9"; return K.grp(K.plane(w, h, sky, true), K.at(K.box(w + .3, .14, .16, fr), 0, h / 2 + .07, 0), K.at(K.box(w + .3, .14, .16, fr), 0, -h / 2 - .07, 0), K.at(K.box(.14, h, .16, fr), -w / 2 - .07, 0, 0), K.at(K.box(.14, h, .16, fr), w / 2 + .07, 0, 0), K.at(K.box(.08, h, .1, fr), 0, 0, .02), K.at(K.rbox(w + .5, .1, .5, fr, .03), 0, -h / 2 - .12, .2)); } },
+  bed: { b(K, p, C) { const c = p.color || "#AFC3E6"; return K.grp(K.at(K.rbox(3.0, .6, 4.4, p.color2 || "#C9A57E", .06), 0, .4, 0), K.at(K.rbox(2.9, .45, 4.2, "#FFFDF9", .15), 0, .9, 0), K.at(K.rbox(2.95, .2, 2.9, c, .08), 0, 1.15, .65), K.at(K.rbox(1.1, .3, .7, "#FFFDF9", .14), -.65, 1.25, -1.6), K.at(K.rbox(1.1, .3, .7, "#FFFDF9", .14), .65, 1.25, -1.6), K.at(K.rbox(3.1, 1.6, .2, p.color2 || "#C9A57E", .06), 0, 1.3, -2.2)); } },
+  tree: { b(K, p) { const c = p.color || "#7FB35E", g = K.grp(K.at(K.cyl(.22, .32, 2.6, p.color2 || "#8C6A55", 10), 0, 1.3, 0)); [[0, 3.2, 0, 1.3], [-.6, 2.7, .3, .9], [.6, 2.8, -.2, 1.0], [.1, 3.9, .1, .8]].forEach(([x, y, z, r], i) => g.add(K.at(K.sph(r, i % 2 ? c : "#97C276", 14), x, y, z))); return g; } },
+  fireplace: { b(K, p) { const c = p.color || "#C8B6A6"; const glow = K.tex(128, 96, (x, W, H) => { const g = x.createRadialGradient(W / 2, H, 6, W / 2, H, W / 1.6); g.addColorStop(0, "#FFE29A"); g.addColorStop(.5, "#F5A623"); g.addColorStop(1, "#3A2420"); x.fillStyle = g; x.fillRect(0, 0, W, H); });
+    const o = K.grp(K.at(K.rbox(3.0, 2.6, .9, c, .05), 0, 1.3, 0), K.at(K.box(1.8, 1.4, .1, "#2B1E1A"), 0, .9, .42), K.at(K.plane(1.6, 1.2, glow, true), 0, .85, .48), K.at(K.rbox(3.4, .18, 1.1, "#FFFDF9", .04), 0, 2.65, .05)); o.userData.glow = true; return o; } , lamp: true },
+  aquarium: { b(K, p) { const gm = K.M(null, { color: p.color || "#8FD3F0", transparent: true, opacity: .55 }); const g = K.grp(K.at(K.rbox(2.6, 1.6, 1.2, p.color2 || "#2B3563", .05), 0, .8, 0), K.at(K.box(2.4, 1.4, 1.0, gm), 0, 2.3, 0), K.at(K.box(2.3, .12, .9, "#E9D9B8"), 0, 1.68, 0));
+    [["#F5A623", -.5, 2.3], ["#E2434F", .4, 2.6], ["#FFD84D", .1, 2.0]].forEach(([c, x, y]) => { const f = K.cone(.12, .35, c, 8); f.rotation.z = Math.PI / 2; g.add(K.at(f, x, y, .1)); }); [-.8, .7].forEach(x => { const w = K.cone(.12, .8, "#7FB35E", 6); g.add(K.at(w, x, 2.1, -.2)); }); return g; } },
+  tv: { b(K, p, C) { const scr = K.tex(320, 180, (x, W, H) => { const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, C.accent); g.addColorStop(1, "#1C2342"); x.fillStyle = g; x.fillRect(0, 0, W, H); x.fillStyle = "#fff"; x.beginPath(); x.moveTo(W * .44, H * .32); x.lineTo(W * .6, H * .5); x.lineTo(W * .44, H * .68); x.fill(); });
+    return K.grp(K.at(K.rbox(3.2, .9, 1.0, p.color2 || "#C9A57E", .05), 0, .45, 0), K.at(K.rbox(2.8, 1.65, .12, "#1C1828", .04), 0, 1.95, 0), K.at(K.plane(2.6, 1.46, scr, true), 0, 1.95, .07), K.at(K.cyl(.06, .06, .3, "#1C1828", 8), 0, 1.05, 0)); } },
+  arcade: { b(K, p, C) { const c = p.color || C.accent; const scr = K.tex(160, 140, (x, W, H) => { x.fillStyle = "#1B1440"; x.fillRect(0, 0, W, H); x.fillStyle = "#D6F04F"; for (let i = 0; i < 5; i++) x.fillRect(20 + i * 26, 30 + (i % 2) * 20, 14, 14); x.fillStyle = "#FF5FA2"; x.fillRect(70, 100, 20, 14); });
+    const g = K.grp(K.at(K.rbox(1.4, 3.6, 1.2, c, .06), 0, 1.8, 0), K.at(K.rbox(1.45, .6, .7, "#1C2342", .05), 0, 1.6, .55), K.rot(K.at(K.plane(1.1, .95, scr, true), 0, 2.55, .62), -.15, 0, 0), K.at(K.rbox(1.3, .4, .08, "#FFD84D", .03), 0, 3.4, .61)); [-.25, .1, .35].forEach((x, i) => g.add(K.at(K.sph(.07, ["#E2434F", "#D6F04F", "#AFC3E6"][i], 8), x, 1.95, .8))); return g; } },
+  tent: { b(K, p) { const c = p.color || "#F5A623"; const t = K.cone(2.0, 2.6, c, 4); t.rotation.y = Math.PI / 4; const door = new K.T.Mesh(new K.T.CircleGeometry(.75, 3), new K.T.MeshBasicMaterial({ color: "#3A2A24" })); door.rotation.z = Math.PI / 2; return K.grp(K.at(t, 0, 1.3, 0), K.at(door, 0, .55, 1.43)); } },
+  campfire: { lamp: true, b(K, p) { const g = K.grp(); for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, s = K.sph(.22, "#A9A39A", 8); s.scale.y = .6; g.add(K.at(s, Math.cos(a) * .75, .1, Math.sin(a) * .75)); }
+    [0, Math.PI / 2].forEach(r => { const l = K.cyl(.1, .1, 1.3, "#8C6A55", 8); l.rotation.set(Math.PI / 2, r, 0); l.rotation.z = Math.PI / 2; l.rotation.y = r; g.add(K.at(l, 0, .18, 0)); });
+    const fm = new K.T.MeshBasicMaterial({ color: "#FFB547" }), fm2 = new K.T.MeshBasicMaterial({ color: "#FF6A3D" }); g.add(K.at(new K.T.Mesh(new K.T.ConeGeometry(.35, 1.0, 8), fm2), 0, .7, 0), K.at(new K.T.Mesh(new K.T.ConeGeometry(.22, .7, 8), fm), .1, .6, .1)); const b = new K.T.Mesh(new K.T.SphereGeometry(.05, 6, 4), fm); b.visible = false; g.add(b); g.userData.bulb = b; return g; } },
+  bench: { b(K, p) { const c = p.color || "#C9A57E", l = p.color2 || "#2B2B33"; return K.grp(K.at(K.rbox(2.6, .14, .7, c, .03), 0, .95, 0), K.at(K.rbox(2.6, .6, .12, c, .03), 0, 1.45, -.32), K.at(K.box(.1, .95, .6, l), -1.1, .47, 0), K.at(K.box(.1, .95, .6, l), 1.1, .47, 0)); } },
+  umbrella: { b(K, p, C) { const g = K.grp(K.at(K.cyl(.05, .05, 3.2, "#FFFDF9", 8), 0, 1.6, 0)); const a = K.cone(1.7, .7, p.color || C.accent, 8), b2 = K.cone(1.0, .45, p.color2 || "#FFFDF9", 8); g.add(K.at(a, 0, 3.3, 0), K.at(b2, 0, 3.55, 0)); const ch = K.grp(K.rot(K.at(K.rbox(.9, .08, 1.8, "#FFD84D", .03), 0, .45, 0), -.15, 0, 0), K.rot(K.at(K.rbox(.9, .9, .08, "#FFD84D", .03), 0, .9, -.85), -.5, 0, 0)); g.add(K.at(ch, 1.2, 0, .6)); return g; } },
+  surfboard: { b(K, p, C) { const s = K.sph(.5, p.color || C.accent, 16); s.scale.set(.9, 3.6, .14); const st = K.box(.06, 3.4, .03, "#FFFDF9"); return K.grp(K.rot(K.at(s, 0, 1.75, 0), -.2, 0, 0), K.rot(K.at(st, 0, 1.75, .08), -.2, 0, 0)); } },
+  flowerbed: { b(K, p) { const w = p.w || 2.4, g = K.grp(K.at(K.rbox(w, .6, 1.0, p.color2 || "#C9A57E", .05), 0, .3, 0), K.at(K.box(w - .2, .1, .8, "#7A5A44"), 0, .6, 0)); for (let i = 0; i < Math.round(w * 3); i++) { const x = -w / 2 + .25 + i * (w - .5) / Math.max(1, Math.round(w * 3) - 1), z = (i % 2) * .3 - .15; g.add(K.at(K.cyl(.02, .02, .5, "#7FB35E", 5), x, .85, z), K.at(K.sph(.13, ["#F9C6CC", "#FFD84D", "#E2434F", "#FFFDF9", p.color || "#AFC3E6"][i % 5], 8), x, 1.12, z)); } return g; } },
+  fridge: { b(K, p) { const c = p.color || "#CFE3E6"; return K.grp(K.at(K.rbox(1.9, 4.6, 1.9, c, .12), 0, 2.3, 0), K.at(K.box(1.8, .04, .02, "#9FBFC4"), 0, 3.2, .96), K.at(K.rbox(.08, .9, .1, "#FFFDF9", .03), -.75, 3.9, 1.0), K.at(K.rbox(.08, .9, .1, "#FFFDF9", .03), -.75, 2.4, 1.0), K.at(K.rbox(.22, .22, .08, "#E2434F", .04), .3, 2.7, .98), K.at(K.rbox(.22, .22, .08, "#D6F04F", .04), -.2, 2.9, .98)); } },
+  stove: { b(K, p, C) { const g = K.grp(K.at(K.rbox(2.0, 2.1, 1.6, p.color || "#FFFDF9", .05), 0, 1.05, 0), K.at(K.box(1.9, .05, 1.5, "#2B2B33"), 0, 2.12, 0), K.at(K.cyl(.45, .42, .55, p.color2 || C.accent, 24), -.3, 2.42, 0), K.at(K.cyl(.47, .47, .05, "#1C2342", 24), -.3, 2.72, 0), K.at(K.box(1.4, .7, .06, "#2B2B33"), 0, .9, .8)); return g; } },
+  pendant: { lamp: true, b(K, p, C) { const h = p.drop || 3.2; const g = K.grp(K.at(K.cyl(.015, .015, h, "#2B2B33", 6), 0, 8 - h / 2, 0), K.at(K.cone(.55, .45, p.color || C.lime, 20), 0, 8 - h - .1, 0)); const b = new K.T.Mesh(new K.T.SphereGeometry(.13, 10, 8), new K.T.MeshBasicMaterial({ color: "#FFF1C4" })); K.at(b, 0, 8 - h - .35, 0); g.add(b); g.userData.bulb = b; g.userData.lampY = 8 - h - .6; return g; } },
+  rug: { b(K, p) { const r = (p.w || 3) / 2; return K.grp(K.at(K.cyl(r, r, .04, p.color || "#F9C6CC", 40), 0, .03, 0), K.at(K.cyl(r * .72, r * .72, .045, p.color2 || "#FFFDF9", 40), 0, .035, 0)); } },
   crate: { b(K, p, C) { const g = K.grp(K.at(K.rbox(1.4, 1.0, 1.0, p.color || "#C9A57E", .04), 0, .5, 0)); addItems(K, g, p.items || [], 1.4, 1.0, 0, C); return g; } }
 };
 /* 放在桌面 / 柜面上的小东西 */
@@ -1138,12 +1167,15 @@ function addItems(K, g, items, w, y, z, C) { const n = items.length; items.forEa
     case "record": o = K.grp(K.at(K.rbox(1.0, .25, .8, "#F4EEE6", .04), 0, .12, 0), K.at(K.cyl(.32, .32, .03, "#1C1828", 24), 0, .27, 0)); break;
     default: return;
   } K.at(o, x, y, z); g.add(o); }); }
-function buildProps(K, S, slot, room, C) {
+function buildProps(K, S, slot, room, C, state) {
   (room.props || []).forEach(p => { const def = PROP_KINDS[p.kind]; if (!def) { console.warn("未知物件 kind:", p.kind); return; }
     const o = def.b(K, p, C); if (p.size && p.kind !== "plant") o.scale.setScalar(p.size);
-    if (def.flat) { const y = p.y == null ? 4.6 : p.y; if (p.wall === "left") { K.at(o, -5.92, y, p.z || 0); o.rotation.y = Math.PI / 2; } else K.at(o, p.x || 0, y, -5.92); }
+    if (def.flat) { const y = p.y == null ? 4.6 : p.y; if (p.wall === "left") { K.at(o, -5.92, y, p.z || 0); o.rotation.y = Math.PI / 2; } else K.at(o, p.x || 0, y, -5.92);
+      const onWall = (p.wall === "left" ? "l" : "b"); if (state && !String(state.walls).includes(onWall)) { // 没有墙：给挂件配两根立柱，变成立牌
+        const bb = new K.T.Box3().setFromObject(o), sz = bb.getSize(new K.T.Vector3()), half = Math.max(sz.x, sz.z) / 2 - .15, legs = K.grp(); [-1, 1].forEach(s => legs.add(K.at(K.cyl(.06, .06, bb.min.y, "#8C6A55", 8), p.wall === "left" ? 0 : s * half, bb.min.y / 2, p.wall === "left" ? s * half : 0)));
+        K.at(legs, p.wall === "left" ? -5.92 : (p.x || 0), 0, p.wall === "left" ? (p.z || 0) : -5.92); S.add(legs); } }
     else { let x = p.x || 0, z = p.z || 0, r = p.rot || 0; if (p.wall === "back" && p.z == null) z = -5.3; if (p.wall === "left") { if (p.x == null) x = -5.3; if (p.rot == null) r = Math.PI / 2; } K.at(o, x, p.y || 0, z); o.rotation.y = r; }
-    if (def.lamp) { S.lampBulbs.push(o.userData.bulb); S.lampAt.push([o.position.x, 3.4, o.position.z]); }
+    if (def.lamp) { if (o.userData.bulb) S.lampBulbs.push(o.userData.bulb); S.lampAt.push([o.position.x, o.userData.lampY || (p.kind === "campfire" ? 1.4 : p.kind === "fireplace" ? 1.6 : 3.4), o.position.z + (p.kind === "fireplace" ? 1.2 : 0)]); }
     S.add(o); if (p.key) slot(String(p.key), o, p.for || []); });
 }
 
@@ -1189,7 +1221,7 @@ function makeKit(T) {
     chair(c = "#F4EEE6", leg = "#8C6A55") { const g = grp(at(K.rbox(1.2, .14, 1.1, c, .05), 0, 1.15, 0), at(K.rbox(1.2, 1.2, .14, c, .05), 0, 1.8, -.5)); [[-.5, -.45], [.5, -.45], [-.5, .45], [.5, .45]].forEach(([x, z]) => g.add(at(K.cyl(.05, .05, 1.15, leg, 8), x, .57, z))); return g; },
     table(r = 1, h = 1.5, top = "#F4EEE6", leg = "#2B2B33") { return grp(at(K.cyl(r, r, .1, top, 32), 0, h, 0), at(K.cyl(.07, .07, h, leg, 10), 0, h / 2, 0), at(K.cyl(.45, .5, .06, leg, 20), 0, .03, 0)); },
     lamp(c = "#E2434F") { const g = grp(at(K.cyl(.32, .36, .08, "#2B2B33"), 0, .04, 0), at(K.cyl(.03, .03, 3.6, "#2B2B33", 8), 0, 1.8, 0)); const sh = K.cone(.5, .55, c, 24); at(sh, 0, 3.7, 0); g.add(sh); const b = new T.Mesh(new T.SphereGeometry(.14, 12, 8), new T.MeshBasicMaterial({ color: "#FFF1C4" })); at(b, 0, 3.45, 0); g.add(b); g.userData.bulb = b; return g; },
-    neon(text, color = "#FF5FA2", w = 3.2, h = 1.1) { const t = K.tex(640, 220, (x, W, H) => { x.clearRect(0, 0, W, H); x.font = "bold 92px 'Caveat','ZCOOL KuaiLe',cursive"; x.textAlign = "center"; x.textBaseline = "middle"; x.shadowColor = color; x.shadowBlur = 28; x.fillStyle = "#fff"; for (let i = 0; i < 3; i++) x.fillText(text, W / 2, H / 2); x.shadowBlur = 0; x.strokeStyle = color; x.lineWidth = 3; x.strokeText(text, W / 2, H / 2); }); return K.plane(w, h, t, true); },
+    neon(text, color = "#FF5FA2", w = 3.2, h = 1.1) { const t = K.tex(640, 220, (x, W, H) => { x.clearRect(0, 0, W, H); const fam = "'Caveat','ZCOOL KuaiLe','PingFang SC','Noto Sans SC','Microsoft YaHei',cursive"; x.font = `bold 100px ${fam}`; const fit = Math.min(170, 100 * (W * .82) / Math.max(1, x.measureText(text).width), H * .78); x.font = `bold ${Math.round(fit)}px ${fam}`; x.textAlign = "center"; x.textBaseline = "middle"; x.shadowColor = color; x.shadowBlur = 28; x.fillStyle = "#fff"; for (let i = 0; i < 3; i++) x.fillText(text, W / 2, H / 2); x.shadowBlur = 0; x.strokeStyle = color; x.lineWidth = 3; x.strokeText(text, W / 2, H / 2); }); return K.plane(w, h, t, true); },
     text(ctx, s, x, y, size, color, font = "'Caveat','ZCOOL KuaiLe',cursive", align = "center") { ctx.font = `${size}px ${font}`; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = "middle"; ctx.fillText(s, x, y); }
   };
   return K;
@@ -1242,21 +1274,24 @@ function buildRoom(K, P, root, state) {
   const { T } = K;
   buildBase(K, P, root, state);
   // floor
-  const ft = K.tex(512, 512, (x, w, h) => { if (P.floorTiles) { const n = 8; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { x.fillStyle = (i + j) % 2 ? P.floor : P.floor2; x.fillRect(i * w / n, j * h / n, w / n, h / n); } return; }
+  const fs = P.floorStyle || (P.floorTiles ? "tiles" : "planks");
+  const ft = K.tex(512, 512, (x, w, h) => { if (fs === "plain") { x.fillStyle = P.floor; x.fillRect(0, 0, w, h); for (let i = 0; i < 700; i++) { x.fillStyle = i % 2 ? P.floor2 : "rgba(0,0,0,.05)"; x.globalAlpha = .5; x.fillRect((i * 97) % w, (i * 61) % h, 3 + i % 4, 3 + i % 3); } x.globalAlpha = 1; return; }
+    if (fs === "tiles") { const n = 8; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { x.fillStyle = (i + j) % 2 ? P.floor : P.floor2; x.fillRect(i * w / n, j * h / n, w / n, h / n); } return; }
     x.fillStyle = P.floor; x.fillRect(0, 0, w, h); for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? P.floor2 : P.floor; x.globalAlpha = .55; x.fillRect(0, i * 64, w, 64); x.globalAlpha = 1; x.fillStyle = "rgba(60,40,30,.16)"; x.fillRect(0, i * 64, w, 2); const off = (i * 173) % w; x.fillRect(off, i * 64, 2, 64); } });
   const floor = K.box(12, .3, 12, K.M(null, { map: ft, color: "#ffffff" })); at3(floor, 0, -.15, 0); floor.castShadow = false; root.add(floor);
   // walls
   const wt = K.tex(256, 512, (x, w, h) => { x.fillStyle = P.wall; x.fillRect(0, 0, w, h); if (P.wall2) { x.fillStyle = P.wall2; x.fillRect(0, h * .72, w, h * .28); x.fillStyle = "rgba(255,255,255,.5)"; x.fillRect(0, h * .72, w, 4); } if (P.wallStripes) { x.fillStyle = P.wallStripes; for (let i = 0; i < w; i += 32) x.fillRect(i, 0, 10, h * .72); } });
   const wm = K.M(null, { map: wt, color: "#ffffff" });
+  const W = P.walls === false || P.walls === "none" ? "" : P.walls === "back" ? "b" : P.walls === "left" ? "l" : "bl"; state.walls = W;
   const back = K.box(12.3, 8, .3, wm); at3(back, -.15, 4, -6.15); const left = K.box(.3, 8, 12, wm); at3(left, -6.15, 4, 0);
-  root.add(back, left);
-  root.add(at3(K.box(12.6, .25, .5, P.trim), -.15, 8.1, -6.1), at3(K.box(.5, .25, 12.3, P.trim), -6.1, 8.1, 0));
-  root.add(at3(K.box(12, .3, .06, P.trim), 0, .15, -5.98), at3(K.box(.06, .3, 12, P.trim), -5.98, .15, 0));
+  if (W.includes("b")) root.add(back); if (W.includes("l")) root.add(left);
+  if (W.includes("b")) root.add(at3(K.box(12.6, .25, .5, P.trim), -.15, 8.1, -6.1), at3(K.box(12, .3, .06, P.trim), 0, .15, -5.98));
+  if (W.includes("l")) root.add(at3(K.box(.5, .25, 12.3, P.trim), -6.1, 8.1, 0), at3(K.box(.06, .3, 12, P.trim), -5.98, .15, 0));
   // rug
   if (P.rug) { const rt = K.tex(512, 512, (x, w, h) => { x.clearRect(0, 0, w, h); for (let i = 6; i > 0; i--) { x.fillStyle = i % 2 ? P.rug : P.rug2; x.beginPath(); x.arc(w / 2, h / 2, i * 40, 0, 7); x.fill(); } x.fillStyle = P.rug2; x.beginPath(); x.arc(w / 2, h / 2, 22, 0, 7); x.fill(); });
     const rug = K.plane(5.2, 5.2, rt); rug.rotation.x = -Math.PI / 2; at3(rug, P.rugAt ? P.rugAt[0] : 1.2, .02, P.rugAt ? P.rugAt[1] : .8); root.add(rug); }
   // window on the left wall
-  if (P.window !== false) { const wz = P.windowZ == null ? -1.6 : P.windowZ, wy = P.windowY || 4.8;
+  if (P.window !== false && W.includes("l")) { const wz = P.windowZ == null ? -1.6 : P.windowZ, wy = P.windowY || 4.8;
     const day = K.tex(256, 256, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#8EC5FF"); g.addColorStop(1, "#E8F4FF"); x.fillStyle = g; x.fillRect(0, 0, w, h); x.fillStyle = "#fff"; [[60, 70], [170, 50], [120, 130]].forEach(([cx, cy]) => { for (let i = 0; i < 4; i++) { x.beginPath(); x.arc(cx + i * 16 - 24, cy + (i % 2) * 6, 20, 0, 7); x.fill(); } }); x.fillStyle = "#B9D2A8"; x.fillRect(0, h * .82, w, h * .18); });
     const night = K.tex(256, 256, (x, w, h) => { x.fillStyle = "#1B2148"; x.fillRect(0, 0, w, h); x.fillStyle = "#FFF6C9"; x.beginPath(); x.arc(185, 60, 24, 0, 7); x.fill(); x.fillStyle = "#1B2148"; x.beginPath(); x.arc(198, 52, 22, 0, 7); x.fill(); for (let i = 0; i < 40; i++) { x.fillStyle = `rgba(255,255,255,${.3 + (i % 5) * .12})`; x.fillRect((i * 67) % w, (i * 41) % (h * .7), 2, 2); } for (let i = 0; i < 9; i++) { const bw = 24 + (i % 3) * 8, bh = 40 + (i * 29) % 70; x.fillStyle = "#2B3563"; x.fillRect(i * 30, h - bh, bw, bh); x.fillStyle = "#FFD36E"; for (let j = 0; j < 6; j++) if ((i + j) % 3 === 0) x.fillRect(i * 30 + 6 + (j % 2) * 10, h - bh + 8 + Math.floor(j / 2) * 12, 4, 5); } });
     const glass = K.plane(2.6, 2.3, day, true); glass.rotation.y = Math.PI / 2; at3(glass, -5.96, wy, wz);
@@ -1264,7 +1299,7 @@ function buildRoom(K, P, root, state) {
     root.add(wg); state.windows.push({ m: glass.material, day, night }); }
   // string lights
   if (P.lights) { const bm = []; const strand = (a, b, n) => { for (let i = 0; i <= n; i++) { const t = i / n, p = a.clone().lerp(b, t); p.y -= Math.sin(t * Math.PI * 3) ** 2 * .35; const m = new T.MeshBasicMaterial({ color: "#FFF4D6" }); const s = new T.Mesh(new T.SphereGeometry(.07, 8, 6), m); s.position.copy(p); root.add(s); bm.push(m); } };
-    strand(new T.Vector3(-5.9, 7.6, -5.9), new T.Vector3(6, 7.6, -5.9), 22); strand(new T.Vector3(-5.9, 7.6, -5.9), new T.Vector3(-5.9, 7.6, 6), 22); state.bulbs.push(...bm); }
+    if (W.includes("b")) strand(new T.Vector3(-5.9, 7.6, -5.9), new T.Vector3(6, 7.6, -5.9), 22); if (W.includes("l")) strand(new T.Vector3(-5.9, 7.6, -5.9), new T.Vector3(-5.9, 7.6, 6), 22); state.bulbs.push(...bm); }
 }
 function at3(o, x, y, z) { o.position.set(x, y, z); return o; }
 
@@ -1519,7 +1554,7 @@ async function boot3D() {
   preset.build(K, S, addSlot);
   if (room) { (room.hide || []).forEach(k => { const i = slots.findIndex(x => x.key === k); if (i >= 0) { slots[i].obj.parent && slots[i].obj.parent.remove(slots[i].obj); slots.splice(i, 1); } });
     const C = COL(); C.hair = (SITE.avatar && SITE.avatar.hair) || "#2A2238"; C.books = [C.ink, C.accent, C.lime, "#AFC3E6", "#F9C6CC", "#F4EEE6"];
-    buildProps(K, S, addSlot, room, C); }
+    buildProps(K, S, addSlot, room, C, state); }
   root.traverse(o => { if (o.isMesh && o.material && o.material.transparent) o.castShadow = false; });
   const lamps = S.lampAt.map(p => { const l = new T.PointLight("#FFC983", 0, 9, 1.6); l.position.set(...p); scene.add(l); return l; });
   // steam puffs
