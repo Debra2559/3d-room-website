@@ -456,6 +456,16 @@ body.flat #gl,body.flat #labels{display:none}
   .art .go{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ---------- 手机适配补充（2026-11-25） ---------- */
+#gl{touch-action:none} /* 手指在 3D 上拖动全部交给 3D：之前竖着拖会被浏览器当成滚动，拖不动 */
+@media (max-width:760px){
+  .hero .hi{font-size:17px;margin-bottom:4px}
+  .hero h1{font-size:clamp(24px,6.9vw,28px);margin-bottom:10px}
+  .cin input{font-size:16px} /* 16px：iPhone 点进输入框不会自动放大页面 */
+}
+/* 触屏：钢琴键上的电脑键盘字母、键盘提示藏起来，换成触屏提示 */
+.touch-only{display:none}
+@media (hover:none) and (pointer:coarse){.piano .w,.piano .b{font-size:0}.kbd-only{display:none}.touch-only{display:inline}}
 </style>
 </head>
 <body>
@@ -871,7 +881,7 @@ const WIDGETS = {
     const blacks = { 61: "w", 63: "e", 66: "t", 68: "y", 70: "u", 73: "o", 75: "p", 78: "", 80: "", 82: "" };
     let h = `<div class="piano">`; whites.forEach((n, i) => h += `<button type="button" class="w" data-n="${n}">${kmap[i] ? kmap[i].toUpperCase() : ""}</button>`);
     Object.entries(blacks).forEach(([n, k]) => { const wi = whites.indexOf(+n - 1); h += `<button type="button" class="b" data-n="${n}" style="left:calc(${(wi + 1) / whites.length * 100}% - 2.6%)">${k.toUpperCase()}</button>`; });
-    el.innerHTML = h + `</div><div class="prow"><button type="button" class="btn main" id="autoplay">▶ 弹一段巴赫《C 大调前奏曲》</button><small>电脑键盘 A–K 是白键，W E T Y U 是黑键</small></div>`;
+    el.innerHTML = h + `</div><div class="prow"><button type="button" class="btn main" id="autoplay">▶ 弹一段巴赫《C 大调前奏曲》</button><small class="kbd-only">电脑键盘 A–K 是白键，W E T Y U 是黑键</small><small class="touch-only">直接点琴键就能弹</small></div>`;
     const keys = {}; el.querySelectorAll("[data-n]").forEach(b => { keys[b.dataset.n] = b; b.addEventListener("pointerdown", () => hit(+b.dataset.n)); });
     const hit = n => { playNote(n); const k = keys[n]; if (k) { k.classList.add("on"); setTimeout(() => k.classList.remove("on"), 180); } };
     const kb = {}; whites.forEach((n, i) => { if (kmap[i]) kb[kmap[i]] = n; }); Object.entries(blacks).forEach(([n, k]) => { if (k) kb[k] = +n; });
@@ -1152,7 +1162,7 @@ const PROP_KINDS = {
 function addItems(K, g, items, w, y, z, C) { const n = items.length; items.forEach((it, i) => { const x = n > 1 ? -w / 2 + .5 + i * (w - 1) / (n - 1) : 0; let o;
   switch (it) {
     case "mug": o = K.mug(C.accent); break;
-    case "laptop": { const lid = K.grp(K.rbox(1.4, .9, .05, "#C8CCD8", .03), K.at(K.plane(1.25, .75, K.tex(160, 100, (c, W, H) => { c.fillStyle = "#1C2342"; c.fillRect(0, 0, W, H); c.fillStyle = C.accent; c.fillRect(12, 14, 70, 10); c.fillStyle = "#D6F04F"; c.fillRect(12, 34, 110, 8); }), true), 0, 0, .03)); K.at(lid, 0, .47, -.42); lid.rotation.x = -.18; o = K.grp(K.rbox(1.4, .06, .9, "#C8CCD8", .03), lid); break; }
+    case "laptop": { const lid = K.grp(K.rbox(1.4, .9, .05, "#C8CCD8", .03), K.at(K.plane(1.25, .75, K.tex(160, 100, (c, W, H) => { c.fillStyle = "#1C2342"; c.fillRect(0, 0, W, H); c.fillStyle = C.accent; c.fillRect(12, 14, 70, 10); c.fillStyle = "#D6F04F"; c.fillRect(12, 34, 110, 8); }), true), 0, 0, .036)); K.at(lid, 0, .47, -.42); lid.rotation.x = -.18; o = K.grp(K.rbox(1.4, .06, .9, "#C8CCD8", .03), lid); break; }
     case "books": o = K.books(6, C.books, .8, i); break;
     case "sketchbooks": o = PROP_KINDS.stack.b(K, {}, C); o.scale.setScalar(.8); break;
     case "jar": { o = K.grp(K.at(K.cyl(.2, .18, .45, "#FFFDF9", 14), 0, .22, 0)); ["#E2434F", "#FFD84D", C.accent].forEach((c, k) => { const s = K.cyl(.03, .03, .8, c, 6); K.at(s, (k - 1) * .07, .55, 0); s.rotation.z = (k - 1) * .15; o.add(s); }); break; }
@@ -1210,7 +1220,7 @@ function makeKit(T) {
     cone: (r, h, c, s = 20) => mesh(new T.ConeGeometry(r, h, s), c),
     tor: (R, r, c, a = Math.PI * 2) => mesh(new T.TorusGeometry(R, r, 10, 32, a), c),
     tex(w, h, draw) { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; draw(cv.getContext("2d"), w, h); const t = new T.CanvasTexture(cv); t.anisotropy = 4; return t; },
-    plane(w, h, map, basic) { const m = basic ? new T.MeshBasicMaterial({ map, transparent: true }) : M(null, { map, color: "#ffffff", transparent: true }); const x = new T.Mesh(new T.PlaneGeometry(w, h), m); x.receiveShadow = !basic; return x; },
+    plane(w, h, map, basic) { const m = basic ? new T.MeshBasicMaterial({ map, transparent: true }) : M(null, { map, color: "#ffffff", transparent: true }); m.polygonOffset = true; m.polygonOffsetFactor = -2; m.polygonOffsetUnits = -2; /* 贴面往前顶，防闪烁 */ const x = new T.Mesh(new T.PlaneGeometry(w, h), m); x.receiveShadow = !basic; return x; },
     /* 挂在墙上的板子（软木板、黑板、菜单、地图……）：draw(ctx,w,h) 画内容 */
     board(w, h, frame, draw, face = "z") { const g = grp(K.rbox(w + .2, h + .2, .12, frame, .05)); const p = K.plane(w, h, K.tex(Math.round(w * 160), Math.round(h * 160), draw)); at(p, 0, 0, .07); g.add(p); if (face === "x") g.rotation.y = Math.PI / 2; return g; },
     books(n, cols, h = .9, seed = 1) { const g = grp(); let x = 0; for (let i = 0; i < n; i++) { const bw = .12 + ((i * 7 + seed) % 5) * .025, bh = h * (.78 + ((i * 13 + seed) % 6) * .045); g.add(at(K.rbox(bw, bh, h * .62, cols[(i + seed) % cols.length], .015), x + bw / 2, bh / 2, 0)); x += bw + .015; } g.children.forEach(c => c.position.x -= x / 2); return g; },
@@ -1541,7 +1551,7 @@ async function boot3D() {
   let renderer; try { renderer = new T.WebGLRenderer({ canvas, antialias: !phone, alpha: true, powerPreference: "high-performance" }); } catch (e) { return false; }
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, phone ? 1.5 : 2)); renderer.setClearColor(0x000000, 0);
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
-  const scene = new T.Scene(), camera = new T.PerspectiveCamera(30, 1, .1, 200);
+  const scene = new T.Scene(), camera = new T.PerspectiveCamera(30, 1, .4, 200);
   const hemi = new T.HemisphereLight("#FFFFFF", "#B8A898", .5); scene.add(hemi);
   const sun = new T.DirectionalLight("#FFF6EA", .62); sun.position.set(8, 16, 10); sun.castShadow = true; sun.shadow.mapSize.set(phone ? 1024 : 2048, phone ? 1024 : 2048);
   Object.assign(sun.shadow.camera, { left: -13, right: 13, top: 13, bottom: -13, near: 1, far: 50 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .02; scene.add(sun);
@@ -1593,9 +1603,18 @@ async function boot3D() {
   // pointer
   let down = null;
   canvas.addEventListener("pointermove", e => { mx = e.clientX / innerWidth * 2 - 1; my = e.clientY / innerHeight * 2 - 1;
-    if (down) { const dx = e.clientX - down.x, dy = e.clientY - down.y; if (Math.hypot(dx, dy) > 6) down.drag = true; if (down.drag) { document.body.classList.add("dragging"); userTh = Math.max(-.6, Math.min(.6, down.th - dx * .005)); userPh = Math.max(-.2, Math.min(.3, down.ph + dy * .003)); } return; }
+    if (touches.has(e.pointerId)) { touches.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pinch && touches.size >= 2) { const [a, b] = [...touches.values()]; userR = Math.max(-18, Math.min(14, pinch.r - (Math.hypot(a.x - b.x, a.y - b.y) - pinch.d) * .06)); return; } }
+    if (down) { const dx = e.clientX - down.x, dy = e.clientY - down.y, tch = e.pointerType === "touch", sx = tch ? .011 : .005, sy = tch ? .006 : .003, lim = tch ? .9 : .6; if (Math.hypot(dx, dy) > 6) down.drag = true; if (down.drag) { document.body.classList.add("dragging"); userTh = Math.max(-lim, Math.min(lim, down.th - dx * sx)); userPh = Math.max(-.25, Math.min(tch ? .42 : .3, down.ph + dy * sy)); } return; }
     ptr.set(mx, -my); ray.setFromCamera(ptr, camera); const h = ray.intersectObjects(hits)[0]; hoverId = h ? h.object.userData.id : null; document.body.classList.toggle("hovering", !!hoverId); });
-  canvas.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY, th: userTh, ph: userPh }; });
+  // 手机：两根手指捏合 = 拉近 / 拉远
+  const touches = new Map(); let pinch = null;
+  canvas.addEventListener("pointerdown", e => {
+    if (e.pointerType === "touch") { touches.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (touches.size === 2) { const [a, b] = [...touches.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), r: userR }; down = null; document.body.classList.remove("dragging"); return; } }
+    down = { x: e.clientX, y: e.clientY, th: userTh, ph: userPh };
+  });
+  const endTouch = e => { touches.delete(e.pointerId); if (touches.size < 2) pinch = null; };
+  addEventListener("pointerup", endTouch);
+  addEventListener("pointercancel", e => { endTouch(e); down = null; document.body.classList.remove("dragging"); });
   addEventListener("pointerup", e => { const wasDrag = down && down.drag; down = null; document.body.classList.remove("dragging"); if (wasDrag || e.target !== canvas) return;
     ptr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight * 2 - 1)); ray.setFromCamera(ptr, camera); const h = ray.intersectObjects(hits)[0];
     if (h) { if (h.object.userData.id === "__me") say(pick((SITE.avatar && SITE.avatar.lines) || ["你好呀～"])); else goTo(h.object.userData.id); } });
@@ -1620,7 +1639,7 @@ async function boot3D() {
   const tagPos = [];
   function loop() { requestAnimationFrame(loop); if (document.hidden) return; const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime; frame++;
     if (openId && frame % 3) return;  // 面板打开时降帧省电
-    const k = 1 - Math.exp(-dt * 3.2), par = (hoverTag || down || focusId) ? 0 : .4;
+    const k = 1 - Math.exp(-dt * ((down && down.drag) || pinch ? 9 : 3.2)), par = (hoverTag || down || focusId) ? 0 : .4; // 手指拖动 / 捏合时镜头跟得更紧
     cam.t.lerp(goal.t, k); cam.r += (goal.r + (focusId ? 0 : userR) - cam.r) * k;
     cam.th += (goal.th + (focusId ? 0 : userTh) + mx * .12 * par - cam.th) * k; cam.ph += (goal.ph + (focusId ? 0 : userPh) - my * .06 * par - cam.ph) * k;
     camera.position.set(cam.t.x + cam.r * Math.cos(cam.ph) * Math.sin(cam.th), cam.t.y + cam.r * Math.sin(cam.ph), cam.t.z + cam.r * Math.cos(cam.ph) * Math.cos(cam.th)); camera.lookAt(cam.t);
